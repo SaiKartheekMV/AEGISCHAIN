@@ -43,3 +43,16 @@ class TransactionResponse(BaseModel):
     checks_passed: list[str]
     checks_failed: list[str]
     timestamp: str
+
+
+class TransactionNotifyRequest(BaseModel):
+    tx_id: str
+    tx_hash: str
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "tx_id": "0xabc123...",
+                "tx_hash": "0xdeadbeef..."
+            }
+        }

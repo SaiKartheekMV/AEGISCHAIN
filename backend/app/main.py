@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.db.database import init_db
-from app.api.routes import transactions, agents, audit
+from app.api.routes import transactions, agents, audit, ai
 from app.core.config import settings
 
 @asynccontextmanager
@@ -31,6 +31,7 @@ app.add_middleware(
 app.include_router(transactions.router, prefix="/api/v1")
 app.include_router(agents.router, prefix="/api/v1")
 app.include_router(audit.router, prefix="/api/v1")
+app.include_router(ai.router, prefix="/api/v1")
 
 @app.get("/")
 async def root():

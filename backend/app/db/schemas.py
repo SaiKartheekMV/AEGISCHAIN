@@ -28,6 +28,7 @@ class TransactionRecord(Base):
     decision = Column(String)
     block_reason = Column(Text, nullable=True)
     ai_explanation = Column(Text, nullable=True)
+    tx_hash = Column(String, nullable=True)
     timestamp = Column(DateTime, server_default=func.now())
 
 class AgentRecord(Base):

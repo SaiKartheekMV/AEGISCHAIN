@@ -1,0 +1,105 @@
+{
+  "abi": [
+    {
+      "type": "constructor",
+      "inputs": [
+        {"name": "_registry", "type": "address"},
+        {"name": "_maxTxValueEth", "type": "uint256"},
+        {"name": "_dailyLimitEth", "type": "uint256"},
+        {"name": "_highValueThresholdEth", "type": "uint256"}
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "validateTransaction",
+      "inputs": [
+        {"name": "_agent", "type": "address"},
+        {"name": "_target", "type": "address"},
+        {"name": "_value", "type": "uint256"},
+        {"name": "_functionSig", "type": "bytes4"}
+      ],
+      "outputs": [
+        {"name": "", "type": "uint8"},
+        {"name": "", "type": "string"}
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "addToBlacklist",
+      "inputs": [{"name": "_addr", "type": "address"}],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "removeFromBlacklist",
+      "inputs": [{"name": "_addr", "type": "address"}],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "addToWhitelist",
+      "inputs": [{"name": "_addr", "type": "address"}],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "removeFromWhitelist",
+      "inputs": [{"name": "_addr", "type": "address"}],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "blacklist",
+      "inputs": [{"name": "", "type": "address"}],
+      "outputs": [{"name": "", "type": "bool"}],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "whitelist",
+      "inputs": [{"name": "", "type": "address"}],
+      "outputs": [{"name": "", "type": "bool"}],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "maxTxValueWei",
+      "inputs": [],
+      "outputs": [{"name": "", "type": "uint256"}],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "dailyLimitWei",
+      "inputs": [],
+      "outputs": [{"name": "", "type": "uint256"}],
+      "stateMutability": "view"
+    },
+    {
+      "type": "event",
+      "name": "TransactionApproved",
+      "inputs": [
+        {"name": "txId", "type": "bytes32", "indexed": true},
+        {"name": "agent", "type": "address", "indexed": true},
+        {"name": "target", "type": "address", "indexed": false},
+        {"name": "value", "type": "uint256", "indexed": false}
+      ]
+    },
+    {
+      "type": "event",
+      "name": "TransactionBlocked",
+      "inputs": [
+        {"name": "txId", "type": "bytes32", "indexed": true},
+        {"name": "agent", "type": "address", "indexed": true},
+        {"name": "reason", "type": "string", "indexed": false},
+        {"name": "risk", "type": "uint8", "indexed": false}
+      ]
+    }
+  ]
+}

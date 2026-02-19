@@ -4,6 +4,10 @@ from app.db.database import get_db
 from app.models.transaction import TransactionRequest, TransactionResponse
 from app.services.guardrail_engine import guardrail_engine
 from app.services.audit_logger import audit_logger
+from app.models.transaction import TransactionNotifyRequest
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.db.schemas import TransactionRecord
+from app.db.database import get_db
 
 router = APIRouter(prefix="/transactions", tags=["Transactions"])
 
@@ -13,7 +17,7 @@ async def validate_transaction(
     db: AsyncSession = Depends(get_db)
 ):
     """🔥 Core endpoint — validate a transaction through all guardrail layers"""
-    result = await guardrail_engine.validate(tx)
+    result = await guardrail_engine.validate(tx, db)
     await audit_logger.log_transaction(db, tx, result)
     return result
 
@@ -57,3 +61,20 @@ async def whitelist_address(address: str, db: AsyncSession = Depends(get_db)):
     guardrail_engine.add_to_whitelist(address)
     await audit_logger.log_event(db, "WHITELIST_ADDED", address, f"Address {address} whitelisted", 0)
     return {"message": f"Address {address} whitelisted successfully"}
+
+
+@router.post("/notify")
+async def notify_transaction(
+    notify: TransactionNotifyRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """Called by frontend after user broadcasts a MetaMask transaction.
+    Associates the on-chain transaction hash with the earlier validated tx_id.
+    """
+    success = await audit_logger.update_transaction_hash(db, notify.tx_id, notify.tx_hash)
+    if not success:
+        raise HTTPException(status_code=404, detail="Transaction id not found")
+
+    # Log an audit event for the submission
+    await audit_logger.log_event(db, "TX_BROADCAST", "", f"Tx {notify.tx_id} broadcast as {notify.tx_hash}", 0)
+    return {"message": "Notified successfully", "tx_id": notify.tx_id, "tx_hash": notify.tx_hash}

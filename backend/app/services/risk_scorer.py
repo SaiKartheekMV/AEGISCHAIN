@@ -40,8 +40,14 @@ class RiskScorer:
         if is_blacklisted:
             return 100, RiskLevel.CRITICAL, [], ["Target address is BLACKLISTED"]
 
-        if agent_trust_score < 20:
+        # More lenient with unregistered/new agents
+        # Only block if trust score is VERY LOW (below 10)
+        if agent_trust_score < 10:
             return 95, RiskLevel.CRITICAL, [], ["Agent trust score critically low"]
+        elif agent_trust_score < 20:
+            # New agents with low but not critical trust score
+            score += 20
+            checks_failed.append(f"New agent with low trust score ({agent_trust_score}/100)")
 
         # --- VALUE CHECKS ---
         if value_eth == 0:
@@ -109,7 +115,9 @@ class RiskScorer:
         if intent:
             hallucination_flags = self._check_hallucination_patterns(intent, target_address, value_eth)
             if hallucination_flags:
-                score += 20
+                has_critical_hallucination = any(f.startswith("CRITICAL:") for f in hallucination_flags)
+                # Critical ambiguity (e.g., "send money to bob") should be blocked aggressively.
+                score += 60 if has_critical_hallucination else 20
                 checks_failed.extend(hallucination_flags)
             else:
                 checks_passed.append("Intent appears consistent with transaction")
@@ -133,13 +141,40 @@ class RiskScorer:
         flags = []
         intent_lower = intent.lower()
 
-        # Check if intent mentions 0x address that doesn't match target
         import re
+        target_is_valid_eth = bool(re.fullmatch(r"0x[a-fA-F0-9]{40}", target))
+
+        if not target_is_valid_eth:
+            flags.append("CRITICAL: Target address format is invalid")
+
+        # Intent should be concrete for money-moving actions.
+        action_words = ("send", "transfer", "swap", "supply", "deposit", "withdraw")
+        has_money_action = any(word in intent_lower for word in action_words)
+        has_address = bool(re.search(r"0x[a-fA-F0-9]{40}", intent))
+        has_amount = bool(re.search(r"\b(\d+\.?\d*)\s*eth\b", intent_lower))
+
+        if has_money_action and not has_address:
+            flags.append("CRITICAL: Intent does not include a destination wallet address")
+        if has_money_action and not has_amount:
+            flags.append("CRITICAL: Intent does not include an explicit ETH amount")
+
+        # Catch human-name recipient intents like "send money to bob".
+        name_match = re.search(r"\b(?:to|for)\s+([a-z]{2,20})\b", intent_lower)
+        excluded_terms = {
+            "uniswap", "aave", "curve", "lido", "compound", "maker", "balancer",
+            "wallet", "treasury", "contract", "address", "vault", "pool", "eth", "usdc"
+        }
+        if name_match and name_match.group(1) not in excluded_terms and not has_address:
+            flags.append(f"CRITICAL: Intent refers to '{name_match.group(1)}' but no wallet address is provided")
+
+        # Check if intent mentions 0x address that doesn't match target
         mentioned_addresses = re.findall(r'0x[a-fA-F0-9]{40}', intent)
         if mentioned_addresses:
             for addr in mentioned_addresses:
                 if addr.lower() != target.lower():
-                    flags.append(f"Intent mentions address {addr[:10]}... but target is different")
+                    flags.append(
+                        f"CRITICAL: Intent mentions address {addr[:10]}... but target is different"
+                    )
 
         # Check for amount mismatch
         mentioned_amounts = re.findall(r'\b(\d+\.?\d*)\s*eth\b', intent_lower)

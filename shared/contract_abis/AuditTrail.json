@@ -1,0 +1,91 @@
+{
+  "abi": [
+    {
+      "type": "constructor",
+      "inputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "logEvent",
+      "inputs": [
+        {"name": "_type", "type": "uint8"},
+        {"name": "_agent", "type": "address"},
+        {"name": "_target", "type": "address"},
+        {"name": "_value", "type": "uint256"},
+        {"name": "_description", "type": "string"},
+        {"name": "_riskScore", "type": "uint8"}
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "getEvent",
+      "inputs": [{"name": "_id", "type": "uint256"}],
+      "outputs": [
+        {
+          "name": "",
+          "type": "tuple",
+          "components": [
+            {"name": "id", "type": "uint256"},
+            {"name": "eventType", "type": "uint8"},
+            {"name": "agent", "type": "address"},
+            {"name": "target", "type": "address"},
+            {"name": "value", "type": "uint256"},
+            {"name": "description", "type": "string"},
+            {"name": "riskScore", "type": "uint8"},
+            {"name": "timestamp", "type": "uint256"}
+          ]
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getAgentEvents",
+      "inputs": [{"name": "_agent", "type": "address"}],
+      "outputs": [{"name": "", "type": "uint256[]"}],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getTotalEvents",
+      "inputs": [],
+      "outputs": [{"name": "", "type": "uint256"}],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getRecentEvents",
+      "inputs": [{"name": "_count", "type": "uint256"}],
+      "outputs": [
+        {
+          "name": "",
+          "type": "tuple[]",
+          "components": [
+            {"name": "id", "type": "uint256"},
+            {"name": "eventType", "type": "uint8"},
+            {"name": "agent", "type": "address"},
+            {"name": "target", "type": "address"},
+            {"name": "value", "type": "uint256"},
+            {"name": "description", "type": "string"},
+            {"name": "riskScore", "type": "uint8"},
+            {"name": "timestamp", "type": "uint256"}
+          ]
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "event",
+      "name": "AuditEventLogged",
+      "inputs": [
+        {"name": "id", "type": "uint256", "indexed": true},
+        {"name": "eventType", "type": "uint8", "indexed": false},
+        {"name": "agent", "type": "address", "indexed": true},
+        {"name": "riskScore", "type": "uint8", "indexed": false}
+      ]
+    }
+  ]
+}

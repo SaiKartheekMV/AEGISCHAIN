@@ -3,11 +3,12 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   LayoutDashboard, Bot, ArrowLeftRight,
-  ScrollText, FlaskConical, Shield
+  ScrollText, FlaskConical, Shield, Send
 } from "lucide-react"
 
 const nav = [
   { href: "/dashboard",    label: "Dashboard",    icon: LayoutDashboard },
+  { href: "/send",         label: "Send",         icon: Send             },
   { href: "/transactions", label: "Transactions", icon: ArrowLeftRight   },
   { href: "/agents",       label: "Agents",       icon: Bot              },
   { href: "/audit",        label: "Audit Logs",   icon: ScrollText       },

@@ -17,6 +17,15 @@ export interface Transaction {
   timestamp: string
 }
 
+export interface ValidateTxRequest {
+  agent_address: string
+  target_address: string
+  value_eth: number
+  function_sig?: string
+  intent?: string
+  protocol?: string
+}
+
 export interface Agent {
   address: string
   name: string
@@ -45,6 +54,19 @@ export interface AuditLog {
   timestamp: string
 }
 
+// MetaMask/Ethereum Types
+export interface EthereumProvider {
+  isMetaMask?: boolean
+  request: (request: { method: string; params?: (string | number | boolean)[] }) => Promise<string | number | boolean | object>
+  on: (event: string, listener: (...args: (string | number | boolean | object)[]) => void) => void
+  removeListener: (event: string, listener: (...args: (string | number | boolean | object)[]) => void) => void
+}
+
+declare global {
+  interface Window {
+    ethereum?: EthereumProvider
+  }
+}
 export interface ValidateTxRequest {
   agent_address: string
   target_address: string

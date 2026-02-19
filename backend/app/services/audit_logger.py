@@ -27,6 +27,17 @@ class AuditLogger:
         db.add(record)
         await db.commit()
 
+    async def update_transaction_hash(self, db: AsyncSession, tx_id: str, tx_hash: str):
+        result = await db.execute(
+            select(TransactionRecord).where(TransactionRecord.tx_id == tx_id)
+        )
+        record = result.scalars().first()
+        if not record:
+            return False
+        record.tx_hash = tx_hash
+        await db.commit()
+        return True
+
     async def log_event(
         self,
         db: AsyncSession,

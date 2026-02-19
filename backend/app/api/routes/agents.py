@@ -76,3 +76,49 @@ async def update_agent(address: str, update: AgentUpdate, db: AsyncSession = Dep
 
     await db.commit()
     return {"message": "Agent updated", "address": address}
+
+
+@router.post("/auto-register/{address}", response_model=AgentResponse)
+async def auto_register_agent(address: str, db: AsyncSession = Depends(get_db)):
+    """Auto-register an agent if not already registered. Used for new wallet connections."""
+    # Check if agent already exists
+    existing = await db.execute(select(AgentRecord).where(AgentRecord.address == address))
+    agent = existing.scalar_one_or_none()
+    
+    if agent:
+        # Already registered, return existing
+        return AgentResponse(
+            address=agent.address, name=agent.name,
+            trust_score=agent.trust_score, is_active=agent.is_active,
+            tx_count=agent.tx_count, blocked_count=agent.blocked_count,
+            registered_at=str(agent.registered_at)
+        )
+    
+    # Create new agent with good default trust score
+    # New agents start with 60 trust score (better than minimum 20 threshold)
+    new_agent = AgentRecord(
+        address=address,
+        name=f"Agent-{address[:6]}",  # Auto-generated name
+        trust_score=60,  # Good starting trust score
+        is_active=True,
+        tx_count=0,
+        blocked_count=0
+    )
+    db.add(new_agent)
+    await db.commit()
+    await db.refresh(new_agent)
+
+    await audit_logger.log_event(
+        db, 
+        "AGENT_AUTO_REGISTERED", 
+        address, 
+        f"Agent auto-registered with trust score 60",
+        risk_score=0
+    )
+
+    return AgentResponse(
+        address=new_agent.address, name=new_agent.name,
+        trust_score=new_agent.trust_score, is_active=new_agent.is_active,
+        tx_count=new_agent.tx_count, blocked_count=new_agent.blocked_count,
+        registered_at=str(new_agent.registered_at)
+    )

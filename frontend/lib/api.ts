@@ -28,11 +28,19 @@ export const transactionApi = {
     const res = await api.post(`/api/v1/transactions/whitelist/${address}`)
     return res.data
   },
+  notify: async (txId: string, txHash: string) => {
+    const res = await api.post(`/api/v1/transactions/notify`, { tx_id: txId, tx_hash: txHash })
+    return res.data
+  },
 }
 
 export const agentApi = {
   register: async (address: string, name: string): Promise<Agent> => {
     const res = await api.post("/api/v1/agents/register", { address, name })
+    return res.data
+  },
+  autoRegister: async (address: string): Promise<Agent> => {
+    const res = await api.post(`/api/v1/agents/auto-register/${address}`)
     return res.data
   },
   getAll: async (): Promise<Agent[]> => {
@@ -55,6 +63,28 @@ export const auditApi = {
 export const healthApi = {
   check: async () => {
     const res = await api.get("/health")
+    return res.data
+  },
+}
+
+export interface ParseIntentRequest {
+  intent: string
+}
+
+export interface ParseIntentResponse {
+  to_address: string
+  amount: number
+  ai_confidence: number
+  reasoning: string
+  parsed_from: string
+  transaction_type: string
+  is_protocol_interaction: boolean
+  protocol_name?: string | null
+}
+
+export const aiApi = {
+  parseIntent: async (data: ParseIntentRequest): Promise<ParseIntentResponse> => {
+    const res = await api.post("/api/v1/ai/parse-intent", data)
     return res.data
   },
 }
